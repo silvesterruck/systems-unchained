@@ -843,18 +843,10 @@
             const scale = isMobile ? SCALE_MOBILE : SCALE;
             const scaledW = 48 * scale;
             const gap = 8;
-            let powerLeft, audioLeft, top;
-            if (isMobile) {
-                const totalW = scaledW * 2 + gap;
-                powerLeft = (window.innerWidth - totalW) / 2;
-                audioLeft = powerLeft + scaledW + gap;
-                top = '5rem';
-            } else {
-                const rightMargin = 32;
-                audioLeft = window.innerWidth - rightMargin - scaledW;
-                powerLeft = audioLeft - gap - scaledW;
-                top = '24px';
-            }
+            const totalW = scaledW * 2 + gap;
+            const powerLeft = (window.innerWidth - totalW) / 2;
+            const audioLeft = powerLeft + scaledW + gap;
+            const top = isMobile ? '4rem' : '1.5rem';
             return { powerLeft, audioLeft, top, scale };
         }
 
