@@ -846,7 +846,7 @@
             const totalW = scaledW * 2 + gap;
             const powerLeft = (window.innerWidth - totalW) / 2;
             const audioLeft = powerLeft + scaledW + gap;
-            const top = isMobile ? '4rem' : '1.5rem';
+            const top = isMobile ? '12rem' : 'calc(100vh - 5rem)';
             return { powerLeft, audioLeft, top, scale };
         }
 
@@ -883,41 +883,70 @@
                     const rect = soundBtn.getBoundingClientRect();
                     const pos = getParkedPositions();
 
-                    // Switch from CSS positioning to explicit JS positioning
-                    soundBtn.style.bottom = 'auto';
-                    soundBtn.style.left = rect.left + 'px';
-                    soundBtn.style.top = rect.top + 'px';
-                    soundBtn.style.transform = isMobile ? 'scale(0.7)' : 'none';
-                    soundBtn.style.transformOrigin = 'top left';
-                    void soundBtn.offsetWidth; // Force reflow
-
-                    // Animate to parked position (already offset left for the split)
-                    soundBtn.style.transition = 'left 1.4s cubic-bezier(0.15, 0.85, 0.25, 1), top 1.4s cubic-bezier(0.15, 0.85, 0.25, 1), transform 1.4s cubic-bezier(0.15, 0.85, 0.25, 1)';
-                    soundBtn.style.left = pos.powerLeft + 'px';
-                    soundBtn.style.top = pos.top;
-                    soundBtn.style.transform = `scale(${pos.scale})`;
-
                     // Activate crawl
                     crawlWrapper.classList.add('active');
 
-                    // Phase 3: Landing + Split — audio button materializes
-                    setTimeout(() => {
-                        soundBtn.classList.remove('launching');
-                        soundBtn.classList.add('parked');
-                        isLaunching = false;
+                    if (isMobile) {
+                        // Mobile: no flight, just proceed to split in place
+                        setTimeout(() => {
+                            soundBtn.classList.remove('launching');
+                            soundBtn.classList.add('parked');
+                            isLaunching = false;
 
-                        soundBtn.style.transition = 'left 0.4s ease, filter 0.3s ease, opacity 0.3s ease';
+                            // Switch from CSS centered to explicit positioning
+                            const btnRect = soundBtn.getBoundingClientRect();
+                            soundBtn.style.bottom = 'auto';
+                            soundBtn.style.left = btnRect.left + 'px';
+                            soundBtn.style.top = btnRect.top + 'px';
+                            soundBtn.style.transform = 'scale(0.7)';
+                            soundBtn.style.transformOrigin = 'top left';
+                            void soundBtn.offsetWidth;
 
-                        // Position and reveal audio button
-                        audioBtn.style.top = pos.top;
-                        audioBtn.style.left = pos.audioLeft + 'px';
-                        audioBtn.style.transformOrigin = 'top left';
-                        audioBtn.style.transform = `scale(${pos.scale})`;
-                        setTimeout(() => audioBtn.classList.add('visible'), 50);
+                            // Animate the split
+                            soundBtn.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease, filter 0.3s ease, opacity 0.3s ease';
+                            soundBtn.style.left = pos.powerLeft + 'px';
+                            soundBtn.style.transform = `scale(${pos.scale})`;
 
-                        // Start the mission statement crawl
-                        showNextLine();
-                    }, 1500);
+                            // Audio button at same height
+                            audioBtn.style.top = btnRect.top + 'px';
+                            audioBtn.style.left = pos.audioLeft + 'px';
+                            audioBtn.style.transformOrigin = 'top left';
+                            audioBtn.style.transform = `scale(${pos.scale})`;
+                            setTimeout(() => audioBtn.classList.add('visible'), 50);
+
+                            showNextLine();
+                        }, 1500);
+                    } else {
+                        // Desktop: fly to bottom center
+                        soundBtn.style.bottom = 'auto';
+                        soundBtn.style.left = rect.left + 'px';
+                        soundBtn.style.top = rect.top + 'px';
+                        soundBtn.style.transform = 'none';
+                        soundBtn.style.transformOrigin = 'top left';
+                        void soundBtn.offsetWidth;
+
+                        soundBtn.style.transition = 'left 1.4s cubic-bezier(0.15, 0.85, 0.25, 1), top 1.4s cubic-bezier(0.15, 0.85, 0.25, 1), transform 1.4s cubic-bezier(0.15, 0.85, 0.25, 1)';
+                        soundBtn.style.left = pos.powerLeft + 'px';
+                        soundBtn.style.top = pos.top;
+                        soundBtn.style.transform = `scale(${pos.scale})`;
+
+                        // Phase 3: Landing + Split
+                        setTimeout(() => {
+                            soundBtn.classList.remove('launching');
+                            soundBtn.classList.add('parked');
+                            isLaunching = false;
+
+                            soundBtn.style.transition = 'left 0.4s ease, filter 0.3s ease, opacity 0.3s ease';
+
+                            audioBtn.style.top = pos.top;
+                            audioBtn.style.left = pos.audioLeft + 'px';
+                            audioBtn.style.transformOrigin = 'top left';
+                            audioBtn.style.transform = `scale(${pos.scale})`;
+                            setTimeout(() => audioBtn.classList.add('visible'), 50);
+
+                            showNextLine();
+                        }, 1500);
+                    }
 
                 }, 600); // Charging duration
 
