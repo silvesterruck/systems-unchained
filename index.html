@@ -62,6 +62,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            opacity: 1;
+            transition: opacity 1.5s ease;
+        }
+        .crawl-wrapper.active {
+            opacity: 1;
         }
         .crawl-line {
             position: absolute;
@@ -88,6 +93,31 @@
             color: #FFF;
             text-shadow: 0 0 20px rgba(0, 71, 255, 0.6);
             font-weight: 700;
+        }
+        /* Crawl teaser: ghostly first line with CRT glitch on load */
+        .crawl-line.crawl-teaser {
+            opacity: 0.25;
+            transform: none;
+            color: #666;
+            transition: none;
+            -webkit-animation: teaser-glitch 2.2s ease-in-out infinite;
+            animation: teaser-glitch 2.2s ease-in-out infinite;
+        }
+        @-webkit-keyframes teaser-glitch {
+            0%, 68%, 100% { opacity: 0.25; color: #666; transform: none; }
+            69% { opacity: 0.9; color: #0047FF; transform: translateX(1px); }
+            71% { opacity: 0.1; color: #666; transform: translateX(-2px); }
+            73% { opacity: 0.95; color: #FFF; transform: none; }
+            75% { opacity: 0.8; color: #0047FF; transform: translateX(1px); }
+            77% { opacity: 0.25; color: #666; transform: none; }
+        }
+        @keyframes teaser-glitch {
+            0%, 68%, 100% { opacity: 0.25; color: #666; transform: none; }
+            69% { opacity: 0.9; color: #0047FF; transform: translateX(1px); }
+            71% { opacity: 0.1; color: #666; transform: translateX(-2px); }
+            73% { opacity: 0.95; color: #FFF; transform: none; }
+            75% { opacity: 0.8; color: #0047FF; transform: translateX(1px); }
+            77% { opacity: 0.25; color: #666; transform: none; }
         }
 
         /* --- MOBILE NAV --- */
@@ -172,7 +202,7 @@
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 40%);
         }
 
-        /* --- SOUND TOGGLE (CRAFT ON THE GRID) --- */
+        /* --- POWER TOGGLE (HOLOGRAPHIC ACTIVATOR) --- */
         .sound-toggle {
             position: fixed;
             bottom: 22%;
@@ -189,14 +219,17 @@
             transition: all 0.3s ease;
             padding: 0;
         }
-        .craft-icon {
+        .activator-icon {
             filter: drop-shadow(0 0 8px #0047FF) drop-shadow(0 0 20px rgba(0, 71, 255, 0.4));
             transition: filter 0.3s ease, transform 0.3s ease;
         }
-        .craft-body {
-            transition: stroke 0.3s ease, fill 0.3s ease;
+        .activator-ring {
+            transition: stroke 0.3s ease;
         }
-        .craft-core {
+        .activator-line {
+            transition: stroke 0.3s ease;
+        }
+        .activator-core {
             transition: fill 0.3s ease;
             animation: core-pulse 1.5s ease-in-out infinite;
         }
@@ -204,7 +237,7 @@
             0%, 100% { opacity: 0.6; r: 3; }
             50% { opacity: 1; r: 4; }
         }
-        .sound-label, .sound-label-on {
+        .sound-label, .sound-label-parked {
             font-family: 'Oswald', sans-serif;
             font-size: 0.7rem;
             letter-spacing: 3px;
@@ -215,58 +248,196 @@
         .sound-label {
             animation: label-pulse 2s ease-in-out infinite;
         }
+        .sound-label-parked {
+            display: none;
+        }
         @keyframes label-pulse {
             0%, 100% { opacity: 0.5; }
             50% { opacity: 1; text-shadow: 0 0 8px rgba(0, 71, 255, 0.6); }
         }
-        /* Exhaust trail — vertical lines streaming down behind the craft */
-        .exhaust-trail {
-            position: absolute;
-            bottom: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 0;
-            background: linear-gradient(to bottom, rgba(0, 71, 255, 0.6), transparent);
-            transition: height 0.5s ease;
-            pointer-events: none;
-        }
         /* Hover state */
-        .sound-toggle:hover .craft-icon {
+        .sound-toggle:hover .activator-icon {
             filter: drop-shadow(0 0 14px #0047FF) drop-shadow(0 0 30px rgba(0, 71, 255, 0.6)) drop-shadow(0 0 50px rgba(0, 71, 255, 0.3));
             transform: translateY(-2px);
         }
         .sound-toggle:hover .sound-label,
-        .sound-toggle:hover .sound-label-on {
+        .sound-toggle:hover .sound-label-parked {
             color: #FFF;
             text-shadow: 0 0 10px #0047FF;
         }
-        .sound-toggle:hover .exhaust-trail {
-            height: 30px;
+
+        /* --- LAUNCH SEQUENCE STATES --- */
+        /* Charging: ring spins, everything goes white-hot */
+        .sound-toggle.charging {
+            transform: translateX(-50%) translateY(8px);
         }
-        /* Off state (default) */
-        .sound-toggle:not(.is-playing) .sound-label-on { display: none; }
-        .sound-toggle:not(.is-playing) .sound-label { display: block; }
-        /* Playing state */
-        .sound-toggle.is-playing .sound-label { display: none; }
-        .sound-toggle.is-playing .sound-label-on { display: block; color: #FFF; }
-        .sound-toggle.is-playing .craft-body {
-            stroke: #FFF;
-            fill: rgba(0, 71, 255, 0.15);
+        .sound-toggle.charging .activator-icon {
+            filter: drop-shadow(0 0 20px #FFF) drop-shadow(0 0 40px #0047FF) drop-shadow(0 0 60px rgba(0, 71, 255, 0.8));
+            transform: scale(1.3);
         }
-        .sound-toggle.is-playing .craft-core {
+        .sound-toggle.charging .activator-core {
             fill: #FFF;
+            animation: none;
+            opacity: 1;
         }
-        .sound-toggle.is-playing .craft-icon {
-            filter: drop-shadow(0 0 12px #0047FF) drop-shadow(0 0 25px rgba(0, 71, 255, 0.5));
+        .sound-toggle.charging .activator-ring {
+            stroke: #FFF;
+            animation: ring-spin 0.6s linear infinite;
         }
-        .sound-toggle.is-playing .exhaust-trail {
-            height: 50px;
-            animation: exhaust-flicker 0.8s ease-in-out infinite alternate;
+        .sound-toggle.charging .activator-line {
+            stroke: #FFF;
         }
-        @keyframes exhaust-flicker {
-            0% { height: 40px; opacity: 0.5; }
-            100% { height: 55px; opacity: 0.8; }
+        .sound-toggle.charging .sound-label {
+            animation: none;
+            opacity: 1;
+            color: #FFF;
+            text-shadow: 0 0 10px #0047FF;
+        }
+        @keyframes ring-spin {
+            0% { stroke-dashoffset: -11; }
+            100% { stroke-dashoffset: 77; }
+        }
+        /* Launching: labels fade */
+        .sound-toggle.launching .sound-label {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        /* Parked: settled in corner */
+        .sound-toggle.parked .sound-label {
+            display: none !important;
+        }
+        .sound-toggle.parked .sound-label-parked {
+            display: block;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sound-toggle.parked:hover .sound-label-parked {
+            opacity: 1;
+        }
+        .sound-toggle.parked .activator-icon {
+            filter: drop-shadow(0 0 10px #0047FF) drop-shadow(0 0 20px rgba(0, 71, 255, 0.4));
+        }
+        .sound-toggle.parked .activator-ring {
+            stroke: #0047FF;
+            animation: ring-breathe 3s ease-in-out infinite;
+        }
+        .sound-toggle.parked .activator-core {
+            fill: #0047FF;
+            animation: core-pulse 1.5s ease-in-out infinite;
+        }
+        .sound-toggle.parked .activator-line {
+            stroke: #0047FF;
+        }
+        @keyframes ring-breathe {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        /* Parked + Sleeping: dimmed gray */
+        .sound-toggle.parked.is-sleeping .activator-icon {
+            filter: drop-shadow(0 0 5px rgba(0, 71, 255, 0.3));
+            opacity: 0.5;
+        }
+        .sound-toggle.parked.is-sleeping .activator-ring {
+            stroke: #444;
+            animation: none;
+        }
+        .sound-toggle.parked.is-sleeping .activator-line {
+            stroke: #444;
+        }
+        .sound-toggle.parked.is-sleeping .activator-core {
+            fill: #444;
+            animation: none;
+        }
+        .sound-toggle.parked:hover .activator-icon {
+            opacity: 1 !important;
+            filter: drop-shadow(0 0 14px #0047FF) drop-shadow(0 0 30px rgba(0, 71, 255, 0.6)) !important;
+            transform: scale(1.2);
+        }
+        .sound-toggle.parked.is-sleeping:hover .activator-ring {
+            stroke: #0047FF;
+        }
+        .sound-toggle.parked.is-sleeping:hover .activator-line {
+            stroke: #0047FF;
+        }
+        .sound-toggle.parked.is-sleeping:hover .activator-core {
+            fill: #0047FF;
+        }
+
+        /* --- AUDIO TOGGLE (appears after split) --- */
+        .audio-toggle {
+            position: fixed;
+            z-index: 9500;
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            padding: 0;
+        }
+        .audio-toggle.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .audio-icon {
+            filter: drop-shadow(0 0 8px #0047FF) drop-shadow(0 0 20px rgba(0, 71, 255, 0.4));
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+        .speaker-body, .speaker-wave-1, .speaker-wave-2 {
+            transition: stroke 0.3s ease, opacity 0.3s ease;
+        }
+        .audio-label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #0047FF;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        .audio-toggle:hover .audio-label {
+            opacity: 1;
+            color: #FFF;
+            text-shadow: 0 0 10px #0047FF;
+        }
+        .audio-toggle:hover .audio-icon {
+            filter: drop-shadow(0 0 14px #0047FF) drop-shadow(0 0 30px rgba(0, 71, 255, 0.6));
+            transform: scale(1.2);
+        }
+        /* Audio muted */
+        .audio-toggle.is-muted .audio-icon {
+            filter: drop-shadow(0 0 5px rgba(0, 71, 255, 0.3));
+            opacity: 0.5;
+        }
+        .audio-toggle.is-muted .speaker-body {
+            stroke: #444;
+        }
+        .audio-toggle.is-muted .speaker-wave-1,
+        .audio-toggle.is-muted .speaker-wave-2 {
+            opacity: 0;
+        }
+        .audio-toggle.is-muted:hover .audio-icon {
+            opacity: 1;
+            filter: drop-shadow(0 0 14px #0047FF) drop-shadow(0 0 30px rgba(0, 71, 255, 0.6));
+        }
+        .audio-toggle.is-muted:hover .speaker-body {
+            stroke: #0047FF;
+        }
+        /* Audio sleeping (power off) */
+        .audio-toggle.is-sleeping {
+            pointer-events: none;
+        }
+        .audio-toggle.is-sleeping .audio-icon {
+            filter: drop-shadow(0 0 5px rgba(0, 71, 255, 0.3));
+            opacity: 0.4;
+        }
+        .audio-toggle.is-sleeping .speaker-body,
+        .audio-toggle.is-sleeping .speaker-wave-1,
+        .audio-toggle.is-sleeping .speaker-wave-2 {
+            stroke: #444;
         }
 
         @media (max-width: 900px) {
@@ -344,7 +515,7 @@
             .mobile-panel .footer-info { font-size: 0.8rem; color: #666; margin-top: 1rem; }
             .mobile-panel .footer-info a { color: #E0E0E0; border-bottom: 1px dashed #0047FF; }
 
-            /* Mobile sound toggle — centered, fades when playing */
+            /* Mobile sound toggle — centered */
             .sound-toggle {
                 position: fixed;
                 top: 12rem;
@@ -354,10 +525,22 @@
                 transform: translateX(-50%) scale(0.7);
                 transition: opacity 0.8s ease, filter 0.3s ease;
             }
-            .sound-toggle .exhaust-trail { display: none; }
             .sound-toggle .sound-label { font-size: 0.6rem; }
-            .sound-toggle.is-playing {
-                opacity: 0.3;
+            .sound-toggle.charging {
+                transform: translateX(-50%) scale(0.7) translateY(8px);
+            }
+            .sound-toggle.parked .sound-label-parked {
+                display: block;
+                opacity: 0.6;
+            }
+            .sound-toggle.parked.is-sleeping {
+                opacity: 0.45 !important;
+            }
+            .audio-toggle .audio-label {
+                opacity: 0.6;
+            }
+            .audio-toggle.is-sleeping {
+                opacity: 0.45 !important;
             }
         }
     </style>
@@ -367,17 +550,28 @@
     <audio id="bg-audio" loop preload="auto">
         <source src="audio/ambient.mp3" type="audio/mpeg">
     </audio>
-    <button id="sound-toggle" class="sound-toggle hover-trigger" aria-label="Toggle sound">
-        <svg class="craft-icon" width="36" height="44" viewBox="0 0 36 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Chevron / craft shape pointing up like a speeding vehicle -->
-            <path d="M18 2 L32 28 L26 26 L18 38 L10 26 L4 28 Z" stroke="#0047FF" stroke-width="1.5" fill="none" class="craft-body"/>
-            <!-- Center engine core -->
-            <circle cx="18" cy="20" r="3" fill="#0047FF" class="craft-core"/>
+    <button id="sound-toggle" class="sound-toggle hover-trigger" aria-label="Decrypt">
+        <svg class="activator-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <!-- Power ring: 270deg arc with gap at top -->
+            <circle cx="24" cy="24" r="14" stroke="#0047FF" stroke-width="2" fill="none"
+                    stroke-dasharray="66 22" stroke-dashoffset="-11" stroke-linecap="round"
+                    class="activator-ring"/>
+            <!-- Vertical activation line -->
+            <line x1="24" y1="8" x2="24" y2="22" stroke="#0047FF" stroke-width="2"
+                  stroke-linecap="round" class="activator-line"/>
+            <!-- Center core dot -->
+            <circle cx="24" cy="24" r="3" fill="#0047FF" class="activator-core"/>
         </svg>
-        <span class="sound-label">ENABLE SOUND</span>
-        <span class="sound-label-on">SOUND ON</span>
-        <!-- Exhaust trail lines -->
-        <div class="exhaust-trail"></div>
+        <span class="sound-label">DECRYPT</span>
+        <span class="sound-label-parked">SLEEP</span>
+    </button>
+    <button id="audio-toggle" class="audio-toggle hover-trigger" aria-label="Toggle audio">
+        <svg class="audio-icon" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path d="M20 19 L24 19 L30 14 L30 34 L24 29 L20 29 Z" stroke="#0047FF" stroke-width="2" fill="none" stroke-linejoin="round" class="speaker-body"/>
+            <path d="M34 19 Q37 24 34 29" stroke="#0047FF" stroke-width="2" fill="none" stroke-linecap="round" class="speaker-wave-1"/>
+            <path d="M37 15 Q42 24 37 33" stroke="#0047FF" stroke-width="2" fill="none" stroke-linecap="round" class="speaker-wave-2"/>
+        </svg>
+        <span class="audio-label">MUTE</span>
     </button>
     <div id="cursor">
         <svg id="cursor-svg" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -416,7 +610,7 @@
     </div>
 
     <div class="crawl-wrapper" id="crawl">
-        <p class="crawl-line">The old architectures are giving way.</p>
+        <p class="crawl-line crawl-teaser">The old architectures are giving way.</p>
         <p class="crawl-line">Agents are replacing interfaces.</p>
         <p class="crawl-line">Interfaces are becoming intelligent.</p>
         <p class="crawl-line">Finance is being rewritten.</p>
@@ -599,44 +793,219 @@
 
         drawGrid();
 
-        // --- 3. AUDIO TOGGLE ---
+        // --- 3. LAUNCH SEQUENCE + AUDIO ---
         const audio = document.getElementById('bg-audio');
         const soundBtn = document.getElementById('sound-toggle');
+        const audioBtn = document.getElementById('audio-toggle');
+        const crawlWrapper = document.getElementById('crawl');
+        const soundLabel = soundBtn.querySelector('.sound-label');
+        const parkedLabel = soundBtn.querySelector('.sound-label-parked');
+        const audioLabel = audioBtn.querySelector('.audio-label');
         let isPlaying = false;
+        let isSleeping = false;
+        let hasLaunched = false;
+        let isLaunching = false;
+        let crawlTimeout1 = null;
+        let crawlTimeout2 = null;
         const isMobile = window.matchMedia('(max-width: 900px)').matches;
-        soundBtn.addEventListener('click', () => {
-            if (!isPlaying) {
-                audio.volume = 0;
-                audio.play().then(() => {
-                    isPlaying = true;
-                    soundBtn.classList.add('is-playing');
-                    // Fade in over ~1s
-                    let vol = 0;
-                    const fadeIn = setInterval(() => {
-                        vol += 0.05;
-                        if (vol >= 0.5) {
-                            vol = 0.5;
-                            clearInterval(fadeIn);
-                        }
-                        audio.volume = vol;
-                    }, 50);
-                }).catch(() => {});
-            } else {
-                // Fade out over ~0.5s then pause
-                let vol = audio.volume;
-                const fadeOut = setInterval(() => {
-                    vol -= 0.05;
-                    if (vol <= 0) {
-                        vol = 0;
-                        audio.volume = 0;
-                        audio.pause();
-                        isPlaying = false;
-                        soundBtn.classList.remove('is-playing');
-                        clearInterval(fadeOut);
-                    } else {
-                        audio.volume = vol;
-                    }
+        const SCALE = 0.75;
+        const SCALE_MOBILE = 0.6;
+
+        function fadeInAudio() {
+            audio.volume = 0;
+            audio.play().then(() => {
+                isPlaying = true;
+                let vol = 0;
+                const fadeIn = setInterval(() => {
+                    vol += 0.03;
+                    if (vol >= 0.5) { vol = 0.5; clearInterval(fadeIn); }
+                    audio.volume = vol;
                 }, 50);
+            }).catch(() => {});
+        }
+
+        function fadeOutAudio() {
+            let vol = audio.volume;
+            const fadeOut = setInterval(() => {
+                vol -= 0.05;
+                if (vol <= 0) {
+                    audio.volume = 0;
+                    audio.pause();
+                    isPlaying = false;
+                    clearInterval(fadeOut);
+                } else {
+                    audio.volume = vol;
+                }
+            }, 50);
+        }
+
+        function getParkedPositions() {
+            const scale = isMobile ? SCALE_MOBILE : SCALE;
+            const scaledW = 48 * scale;
+            const gap = 8;
+            let powerLeft, audioLeft, top;
+            if (isMobile) {
+                const totalW = scaledW * 2 + gap;
+                powerLeft = (window.innerWidth - totalW) / 2;
+                audioLeft = powerLeft + scaledW + gap;
+                top = '5rem';
+            } else {
+                const rightMargin = 32;
+                audioLeft = window.innerWidth - rightMargin - scaledW;
+                powerLeft = audioLeft - gap - scaledW;
+                top = '24px';
+            }
+            return { powerLeft, audioLeft, top, scale };
+        }
+
+        function positionParkedButtons() {
+            const pos = getParkedPositions();
+            soundBtn.style.left = pos.powerLeft + 'px';
+            audioBtn.style.left = pos.audioLeft + 'px';
+            if (isMobile) {
+                soundBtn.style.transform = `scale(${pos.scale})`;
+                audioBtn.style.transform = `scale(${pos.scale})`;
+            }
+        }
+
+        soundBtn.addEventListener('click', () => {
+            if (isLaunching) return;
+
+            if (!hasLaunched) {
+                // === FIRST CLICK: DECRYPT SEQUENCE ===
+                hasLaunched = true;
+                isLaunching = true;
+
+                // Phase 1: Charging (600ms) — ring spins, white-hot
+                soundBtn.classList.add('charging');
+                soundLabel.textContent = 'DECRYPTING...';
+                document.querySelector('.crawl-teaser')?.classList.remove('crawl-teaser');
+
+                setTimeout(() => {
+                    // Phase 2: Launch — fly to parked position
+                    soundBtn.classList.remove('charging');
+                    soundBtn.classList.add('launching');
+
+                    fadeInAudio();
+
+                    const rect = soundBtn.getBoundingClientRect();
+                    const pos = getParkedPositions();
+
+                    // Switch from CSS positioning to explicit JS positioning
+                    soundBtn.style.bottom = 'auto';
+                    soundBtn.style.left = rect.left + 'px';
+                    soundBtn.style.top = rect.top + 'px';
+                    soundBtn.style.transform = isMobile ? 'scale(0.7)' : 'none';
+                    soundBtn.style.transformOrigin = 'top left';
+                    void soundBtn.offsetWidth; // Force reflow
+
+                    // Animate to parked position (already offset left for the split)
+                    soundBtn.style.transition = 'left 1.4s cubic-bezier(0.15, 0.85, 0.25, 1), top 1.4s cubic-bezier(0.15, 0.85, 0.25, 1), transform 1.4s cubic-bezier(0.15, 0.85, 0.25, 1)';
+                    soundBtn.style.left = pos.powerLeft + 'px';
+                    soundBtn.style.top = pos.top;
+                    soundBtn.style.transform = `scale(${pos.scale})`;
+
+                    // Activate crawl
+                    crawlWrapper.classList.add('active');
+
+                    // Phase 3: Landing + Split — audio button materializes
+                    setTimeout(() => {
+                        soundBtn.classList.remove('launching');
+                        soundBtn.classList.add('parked');
+                        isLaunching = false;
+
+                        soundBtn.style.transition = 'left 0.4s ease, filter 0.3s ease, opacity 0.3s ease';
+
+                        // Position and reveal audio button
+                        audioBtn.style.top = pos.top;
+                        audioBtn.style.left = pos.audioLeft + 'px';
+                        audioBtn.style.transformOrigin = 'top left';
+                        audioBtn.style.transform = `scale(${pos.scale})`;
+                        setTimeout(() => audioBtn.classList.add('visible'), 50);
+
+                        // Start the mission statement crawl
+                        showNextLine();
+                    }, 1500);
+
+                }, 600); // Charging duration
+
+            } else {
+                // === POST-LAUNCH: FULL SHUTDOWN / WAKE ===
+                if (!isSleeping) {
+                    // Sleep: kill audio + crawl
+                    isSleeping = true;
+                    if (isPlaying) fadeOutAudio();
+                    stopCrawl();
+                    soundBtn.classList.add('is-sleeping');
+                    audioBtn.classList.add('is-sleeping');
+                    parkedLabel.textContent = 'WAKE';
+                } else {
+                    // Wake: resume audio + crawl
+                    isSleeping = false;
+                    fadeInAudio();
+                    resumeCrawl();
+                    soundBtn.classList.remove('is-sleeping');
+                    audioBtn.classList.remove('is-sleeping');
+                    audioBtn.classList.remove('is-muted');
+                    audioLabel.textContent = 'MUTE';
+                    parkedLabel.textContent = 'SLEEP';
+                }
+            }
+        });
+
+        // Audio-only toggle
+        audioBtn.addEventListener('click', () => {
+            if (isSleeping) return;
+            if (isPlaying) {
+                audioBtn.classList.add('is-muted');
+                audioLabel.textContent = 'UNMUTE';
+                fadeOutAudio();
+            } else {
+                audioBtn.classList.remove('is-muted');
+                audioLabel.textContent = 'MUTE';
+                fadeInAudio();
+            }
+        });
+
+        // Keyboard shortcuts: M = mute/unmute, Escape = sleep/wake
+        document.addEventListener('keydown', (e) => {
+            if (!hasLaunched || isLaunching) return;
+            if (e.key === 'm' || e.key === 'M') {
+                if (isSleeping) return;
+                if (isPlaying) {
+                    audioBtn.classList.add('is-muted');
+                    audioLabel.textContent = 'UNMUTE';
+                    fadeOutAudio();
+                } else {
+                    audioBtn.classList.remove('is-muted');
+                    audioLabel.textContent = 'MUTE';
+                    fadeInAudio();
+                }
+            } else if (e.key === 'Escape') {
+                if (!isSleeping) {
+                    isSleeping = true;
+                    if (isPlaying) fadeOutAudio();
+                    stopCrawl();
+                    soundBtn.classList.add('is-sleeping');
+                    audioBtn.classList.add('is-sleeping');
+                    parkedLabel.textContent = 'WAKE';
+                } else {
+                    isSleeping = false;
+                    fadeInAudio();
+                    resumeCrawl();
+                    soundBtn.classList.remove('is-sleeping');
+                    audioBtn.classList.remove('is-sleeping');
+                    audioBtn.classList.remove('is-muted');
+                    audioLabel.textContent = 'MUTE';
+                    parkedLabel.textContent = 'SLEEP';
+                }
+            }
+        });
+
+        // Keep parked buttons positioned correctly on resize
+        window.addEventListener('resize', () => {
+            if (soundBtn.classList.contains('parked')) {
+                positionParkedButtons();
             }
         });
 
@@ -652,16 +1021,29 @@
             line.classList.add('crawl-approaching');
 
             const isLastLine = currentLine === crawlLines.length - 1;
-            const holdTime = isLastLine ? 5000 : 3000;
-            setTimeout(() => {
+            const holdTime = isLastLine ? 7000 : 3000;
+            crawlTimeout1 = setTimeout(() => {
                 line.classList.remove('crawl-approaching');
                 line.classList.add('crawl-passing');
                 currentLine = (currentLine + 1) % crawlLines.length;
                 const pauseTime = isLastLine ? 3000 : 1200;
-                setTimeout(showNextLine, pauseTime);
+                crawlTimeout2 = setTimeout(showNextLine, pauseTime);
             }, holdTime);
         }
-        showNextLine();
+
+        function stopCrawl() {
+            clearTimeout(crawlTimeout1);
+            clearTimeout(crawlTimeout2);
+            crawlLines.forEach(l => l.classList.remove('crawl-approaching', 'crawl-passing'));
+            crawlLines[0].classList.add('crawl-teaser');
+            currentLine = 0;
+        }
+
+        function resumeCrawl() {
+            crawlLines[0].classList.remove('crawl-teaser');
+            showNextLine();
+        }
+        // Crawl is started by the launch sequence, not on page load
 
         // --- 5. MOBILE NAV ---
         if (isMobile) {
