@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systems Unchained</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- RESET & BASICS --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: none; }
+        body { background-color: #050505; color: #E0E0E0; font-family: 'Space Mono', monospace; overflow-x: hidden; min-height: 100vh; width: 100vw; position: relative; }
+        @media (hover: none) { body { cursor: auto; } }
+        a { text-decoration: none; color: inherit; }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor { position: fixed; top: 0; left: 0; width: 20px; height: 20px; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: transform 0.2s ease; display: block; }
+        @media (hover: none) { #cursor { display: none; } }
+        #cursor svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 0 8px #0047FF) drop-shadow(0 0 16px rgba(0, 71, 255, 0.4)); transition: filter 0.2s ease; }
+        .cursor-link-hover { transform: translate(-50%, -50%) scale(1.4) !important; }
+        .cursor-link-hover svg { filter: drop-shadow(0 0 14px #0047FF) drop-shadow(0 0 28px rgba(0, 71, 255, 0.6)) drop-shadow(0 0 40px rgba(0, 71, 255, 0.3)) !important; }
+
+        /* --- LAYOUT --- */
+        .container { 
+            width: 100%; 
+            height: 100vh; 
+            /* MODIFIED PADDING: Top increased to 6rem */
+            padding: 6rem 4rem 3rem 4rem; 
+            position: relative; 
+            z-index: 20; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            pointer-events: none; 
+        }
+        
+        /* Re-enable events for interactive elements */
+        h1, .wing, .footer { pointer-events: auto; }
+        
+        h1 { text-align: center; font-family: 'Oswald', sans-serif; font-size: 4rem; font-weight: 700; text-transform: uppercase; color: #FFF; letter-spacing: 5px; margin-bottom: 2rem; text-shadow: 0 0 20px rgba(0, 71, 255, 0.8); position: relative; z-index: 30; }
+        .content-split { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-grow: 1; }
+        .wing { width: 30%; min-width: 300px; z-index: 25; }
+        .wing-left { text-align: left; }
+        .wing-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+        .services-list { font-family: 'Oswald', sans-serif; font-size: 2.5rem; line-height: 1.2; color: #0047FF; font-weight: 500; text-transform: uppercase; }
+        .services-list div { transition: color 0.3s ease, letter-spacing 0.3s ease; margin-bottom: 0.5rem; }
+        .services-list div:hover { color: #FFF; letter-spacing: 2px; text-shadow: 0 0 10px #0047FF; }
+        /* --- BLADE RUNNER CRAWL --- */
+        .crawl-wrapper {
+            position: fixed;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 700px;
+            height: 50vh;
+            perspective: 500px;
+            z-index: 15;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .crawl-line {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: #888;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateZ(-400px) scale(0.4);
+            transition: opacity 2s ease-out, transform 2s ease-out;
+        }
+        .crawl-line.crawl-approaching {
+            opacity: 1;
+            transform: translateZ(0px) scale(1);
+        }
+        .crawl-line.crawl-passing {
+            opacity: 0;
+            transform: translateZ(200px) scale(1.8);
+            transition: opacity 1.2s ease-in, transform 1.2s ease-in;
+        }
+        .crawl-line.crawl-highlight {
+            color: #FFF;
+            text-shadow: 0 0 20px rgba(0, 71, 255, 0.6);
+            font-weight: 700;
+        }
+
+        /* --- MOBILE NAV --- */
+        .mobile-nav { display: none; }
+        .mobile-panel { display: none; }
+        .footer { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; padding-top: 2rem; font-size: 0.9rem; color: #666; z-index: 30; }
+        .footer-left { text-align: left; }
+        .footer-right { text-align: right; }
+        .footer a { color: #E0E0E0; transition: color 0.3s; }
+        .footer a:hover { color: #0047FF; }
+        .email-link { font-size: 1.1rem; font-weight: bold; color: #FFF; border-bottom: 1px dashed #0047FF; padding-bottom: 2px; }
+        .email-link:hover { border-bottom: 1px solid #FFF; text-shadow: 0 0 10px #0047FF; }
+        .ventures { padding-top: 1.5rem; z-index: 30; pointer-events: auto; text-align: right; max-width: 400px; }
+        .ventures-label { font-family: 'Oswald', sans-serif; font-size: 1.4rem; font-weight: 700; color: #0047FF; letter-spacing: 3px; margin-bottom: 0.5rem; }
+        .ventures-item { font-size: 0.95rem; color: #888; }
+        .ventures-item a { color: #E0E0E0; border-bottom: 1px dashed #0047FF; padding-bottom: 1px; }
+        .ventures-item a:hover { color: #0047FF; }
+        .investments { padding-top: 1.2rem; z-index: 30; pointer-events: auto; text-align: right; max-width: 400px; }
+        .investments-label { font-family: 'Oswald', sans-serif; font-size: 1.4rem; font-weight: 700; color: #0047FF; letter-spacing: 3px; margin-bottom: 0.5rem; }
+        .investments-item { font-size: 0.95rem; color: #888; margin-bottom: 0.3rem; }
+        .investments-item a { color: #E0E0E0; border-bottom: 1px dashed #0047FF; padding-bottom: 1px; }
+        .investments-item a:hover { color: #0047FF; }
+        .investments-item .exit-tag { font-family: 'Oswald', sans-serif; font-size: 0.65rem; color: #0047FF; letter-spacing: 1px; border: 1px solid rgba(0, 71, 255, 0.3); padding: 1px 5px; margin-left: 6px; vertical-align: middle; }
+
+        /* --- AI-NATIVE CTA SECTION --- */
+        .ai-cta {
+            width: 100%;
+            text-align: center;
+            padding: 2rem 0 1.5rem 0;
+            border-top: 1px solid rgba(0, 71, 255, 0.3);
+            z-index: 30;
+            pointer-events: auto;
+        }
+        .ai-cta-label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #FFF;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 71, 255, 0.6);
+            margin-bottom: 0.8rem;
+        }
+        .ai-cta-sub {
+            font-size: 0.95rem;
+            color: #888;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.2rem;
+        }
+        .ai-cta-link {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0047FF;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border: 1px solid rgba(0, 71, 255, 0.4);
+            padding: 0.5rem 1.8rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .ai-cta-link:hover {
+            color: #FFF;
+            border-color: #FFF;
+            text-shadow: 0 0 10px #0047FF;
+            box-shadow: 0 0 20px rgba(0, 71, 255, 0.3);
+        }
+
+        .scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.5)); background-size: 100% 4px; pointer-events: none; z-index: 9000; opacity: 0.15; }
+
+        /* --- CANVAS CONTAINER --- */
+        #grid-canvas {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%; /* Occupies bottom 60% of screen */
+            z-index: 1;
+            /* Fade the grid into the background at the top */
+            mask-image: linear-gradient(to bottom, transparent, black 40%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 40%);
+        }
+
+        /* --- SOUND TOGGLE (CRAFT ON THE GRID) --- */
+        .sound-toggle {
+            position: fixed;
+            bottom: 22%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9500;
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+        .craft-icon {
+            filter: drop-shadow(0 0 8px #0047FF) drop-shadow(0 0 20px rgba(0, 71, 255, 0.4));
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+        .craft-body {
+            transition: stroke 0.3s ease, fill 0.3s ease;
+        }
+        .craft-core {
+            transition: fill 0.3s ease;
+            animation: core-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes core-pulse {
+            0%, 100% { opacity: 0.6; r: 3; }
+            50% { opacity: 1; r: 4; }
+        }
+        .sound-label, .sound-label-on {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #0047FF;
+            transition: all 0.3s ease;
+        }
+        .sound-label {
+            animation: label-pulse 2s ease-in-out infinite;
+        }
+        @keyframes label-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; text-shadow: 0 0 8px rgba(0, 71, 255, 0.6); }
+        }
+        /* Exhaust trail — vertical lines streaming down behind the craft */
+        .exhaust-trail {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 0;
+            background: linear-gradient(to bottom, rgba(0, 71, 255, 0.6), transparent);
+            transition: height 0.5s ease;
+            pointer-events: none;
+        }
+        /* Hover state */
+        .sound-toggle:hover .craft-icon {
+            filter: drop-shadow(0 0 14px #0047FF) drop-shadow(0 0 30px rgba(0, 71, 255, 0.6)) drop-shadow(0 0 50px rgba(0, 71, 255, 0.3));
+            transform: translateY(-2px);
+        }
+        .sound-toggle:hover .sound-label,
+        .sound-toggle:hover .sound-label-on {
+            color: #FFF;
+            text-shadow: 0 0 10px #0047FF;
+        }
+        .sound-toggle:hover .exhaust-trail {
+            height: 30px;
+        }
+        /* Off state (default) */
+        .sound-toggle:not(.is-playing) .sound-label-on { display: none; }
+        .sound-toggle:not(.is-playing) .sound-label { display: block; }
+        /* Playing state */
+        .sound-toggle.is-playing .sound-label { display: none; }
+        .sound-toggle.is-playing .sound-label-on { display: block; color: #FFF; }
+        .sound-toggle.is-playing .craft-body {
+            stroke: #FFF;
+            fill: rgba(0, 71, 255, 0.15);
+        }
+        .sound-toggle.is-playing .craft-core {
+            fill: #FFF;
+        }
+        .sound-toggle.is-playing .craft-icon {
+            filter: drop-shadow(0 0 12px #0047FF) drop-shadow(0 0 25px rgba(0, 71, 255, 0.5));
+        }
+        .sound-toggle.is-playing .exhaust-trail {
+            height: 50px;
+            animation: exhaust-flicker 0.8s ease-in-out infinite alternate;
+        }
+        @keyframes exhaust-flicker {
+            0% { height: 40px; opacity: 0.5; }
+            100% { height: 55px; opacity: 0.8; }
+        }
+
+        @media (max-width: 900px) {
+            .container { padding: 3rem 1.5rem 2rem 1.5rem; height: 100vh; gap: 0; }
+            h1 { font-size: 2.2rem; margin-bottom: 0; }
+            .content-split { display: none; }
+            .footer { display: none; }
+            .crawl-wrapper { bottom: 12%; height: 45vh; }
+            .crawl-line { font-size: 1rem; }
+
+            /* Mobile bottom nav */
+            .mobile-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 9500;
+                justify-content: center;
+                border-top: 1px solid rgba(0, 71, 255, 0.2);
+                background: rgba(5, 5, 5, 0.95);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+            .mobile-nav-btn {
+                flex: 1;
+                padding: 0.9rem 0;
+                background: transparent;
+                border: none;
+                border-right: 1px solid rgba(0, 71, 255, 0.1);
+                color: #0047FF;
+                font-family: 'Oswald', sans-serif;
+                font-size: 0.6rem;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                transition: color 0.3s ease, background 0.3s ease;
+                pointer-events: auto;
+            }
+            .mobile-nav-btn:last-child { border-right: none; }
+            .mobile-nav-btn.active {
+                color: #FFF;
+                background: rgba(0, 71, 255, 0.1);
+            }
+            .mobile-panel {
+                position: fixed;
+                bottom: 3rem;
+                left: 0;
+                right: 0;
+                background: rgba(5, 5, 5, 0.95);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border-top: 1px solid rgba(0, 71, 255, 0.3);
+                padding: 1.5rem;
+                z-index: 9400;
+                text-align: center;
+                max-height: 50vh;
+                overflow-y: auto;
+                transform: translateY(100%);
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                pointer-events: auto;
+            }
+            .mobile-panel.active {
+                display: block;
+                transform: translateY(0);
+            }
+            .mobile-panel .services-list { font-size: 1.4rem; color: #0047FF; }
+            .mobile-panel .services-list div { margin-bottom: 0.5rem; }
+            .mobile-panel .ventures-label,
+            .mobile-panel .investments-label { font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: 700; color: #0047FF; letter-spacing: 3px; margin-bottom: 0.5rem; }
+            .mobile-panel .ventures-item,
+            .mobile-panel .investments-item { font-size: 0.85rem; color: #888; margin-bottom: 0.3rem; }
+            .mobile-panel .investments-item a,
+            .mobile-panel .ventures-item a { color: #E0E0E0; border-bottom: 1px dashed #0047FF; padding-bottom: 1px; }
+            .mobile-panel .exit-tag { font-family: 'Oswald', sans-serif; font-size: 0.6rem; color: #0047FF; letter-spacing: 1px; border: 1px solid rgba(0, 71, 255, 0.3); padding: 1px 4px; margin-left: 4px; }
+            .mobile-panel .footer-info { font-size: 0.8rem; color: #666; margin-top: 1rem; }
+            .mobile-panel .footer-info a { color: #E0E0E0; border-bottom: 1px dashed #0047FF; }
+
+            /* Mobile sound toggle — centered, fades when playing */
+            .sound-toggle {
+                position: fixed;
+                top: 12rem;
+                left: 50%;
+                bottom: auto;
+                right: auto;
+                transform: translateX(-50%) scale(0.7);
+                transition: opacity 0.8s ease, filter 0.3s ease;
+            }
+            .sound-toggle .exhaust-trail { display: none; }
+            .sound-toggle .sound-label { font-size: 0.6rem; }
+            .sound-toggle.is-playing {
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <audio id="bg-audio" loop preload="auto">
+        <source src="audio/ambient.mp3" type="audio/mpeg">
+    </audio>
+    <button id="sound-toggle" class="sound-toggle hover-trigger" aria-label="Toggle sound">
+        <svg class="craft-icon" width="36" height="44" viewBox="0 0 36 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Chevron / craft shape pointing up like a speeding vehicle -->
+            <path d="M18 2 L32 28 L26 26 L18 38 L10 26 L4 28 Z" stroke="#0047FF" stroke-width="1.5" fill="none" class="craft-body"/>
+            <!-- Center engine core -->
+            <circle cx="18" cy="20" r="3" fill="#0047FF" class="craft-core"/>
+        </svg>
+        <span class="sound-label">ENABLE SOUND</span>
+        <span class="sound-label-on">SOUND ON</span>
+        <!-- Exhaust trail lines -->
+        <div class="exhaust-trail"></div>
+    </button>
+    <div id="cursor">
+        <svg id="cursor-svg" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="10" r="5" fill="#0047FF"/>
+        </svg>
+    </div>
+
+    <div class="container">
+        <h1>SYSTEMS UNCHAINED</h1>
+        <div class="content-split">
+            <div class="wing wing-left">
+                <div class="services-list" id="services">
+                    <div class="hover-trigger">PROTOCOL DESIGN</div>
+                    <div class="hover-trigger">NEURAL ARCHITECTURE</div>
+                    <div class="hover-trigger">MEDIA INFRASTRUCTURE</div>
+                    <div class="hover-trigger">AI-NATIVE EXPERIENCES</div>
+                    <div class="hover-trigger">SYSTEMS ENGINEERING</div>
+                </div>
+            </div>
+            <div class="wing wing-right">
+                <div class="ventures">
+                    <div class="ventures-label">VENTURES</div>
+                    <div class="ventures-item"><a href="https://pano.fm" class="hover-trigger" target="_blank">pano.fm</a> — short form cinema. invite only. launching soon.</div>
+                </div>
+                <div class="investments">
+                    <div class="investments-label">INVESTMENTS</div>
+                    <div class="investments-item"><a href="https://cow.fi" class="hover-trigger" target="_blank">CoW Protocol</a> — MEV-protected DEX aggregation</div>
+                    <div class="investments-item"><a href="https://www.opyn.co" class="hover-trigger" target="_blank">Opyn</a> — DeFi options protocol<span class="exit-tag">ACQUIRED BY COINBASE</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="footer-left"><b>Systems Unchained LLC</b><br>Sheridan, WY 82801</div>
+            <div class="footer-right"><a href="mailto:gm@systemsunchained.com" class="email-link hover-trigger">gm@systemsunchained.com</a></div>
+        </div>
+    </div>
+
+    <div class="crawl-wrapper" id="crawl">
+        <p class="crawl-line">The old architectures are giving way.</p>
+        <p class="crawl-line">Agents are replacing interfaces.</p>
+        <p class="crawl-line">Interfaces are becoming intelligent.</p>
+        <p class="crawl-line">Finance is being rewritten.</p>
+        <p class="crawl-line">Control is decentralizing.</p>
+        <p class="crawl-line crawl-highlight">Every system is up for reinvention.</p>
+    </div>
+
+    <!-- Mobile navigation -->
+    <nav class="mobile-nav">
+        <button class="mobile-nav-btn hover-trigger" data-panel="panel-services">Domains</button>
+        <button class="mobile-nav-btn hover-trigger" data-panel="panel-portfolio">Portfolio</button>
+        <button class="mobile-nav-btn hover-trigger" data-panel="panel-contact">Contact</button>
+    </nav>
+    <div class="mobile-panel" id="panel-services">
+        <div class="services-list">
+            <div>PROTOCOL DESIGN</div>
+            <div>NEURAL ARCHITECTURE</div>
+            <div>MEDIA INFRASTRUCTURE</div>
+            <div>AI-NATIVE EXPERIENCES</div>
+            <div>SYSTEMS ENGINEERING</div>
+        </div>
+    </div>
+    <div class="mobile-panel" id="panel-portfolio">
+        <div class="ventures-label">VENTURES</div>
+        <div class="ventures-item"><a href="https://pano.fm" target="_blank">pano.fm</a> — short form cinema. invite only. launching soon.</div>
+        <div class="investments-label" style="margin-top:1rem;">INVESTMENTS</div>
+        <div class="investments-item"><a href="https://cow.fi" target="_blank">CoW Protocol</a> — MEV-protected DEX aggregation</div>
+        <div class="investments-item"><a href="https://www.opyn.co" target="_blank">Opyn</a> — DeFi options protocol<span class="exit-tag">ACQUIRED BY COINBASE</span></div>
+    </div>
+    <div class="mobile-panel" id="panel-contact">
+        <div class="footer-info">
+            <b>Systems Unchained LLC</b><br>Sheridan, WY 82801<br><br>
+            <a href="mailto:gm@systemsunchained.com">gm@systemsunchained.com</a>
+        </div>
+    </div>
+
+    <canvas id="grid-canvas"></canvas>
+
+    <script>
+        // --- 1. CURSOR & INTERACTION LOGIC ---
+        const cursor = document.getElementById('cursor');
+        const hoverTriggers = document.querySelectorAll('.hover-trigger');
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+        if (!isTouchDevice) {
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+            hoverTriggers.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    cursor.classList.add('cursor-link-hover');
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursor.classList.remove('cursor-link-hover');
+                });
+            });
+        }
+
+        // --- 2. 3D GRID ENGINE (CANVAS) ---
+        const canvas = document.getElementById('grid-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let mouseX = 0, mouseY = 0;
+        let frame = 0;
+
+        // Configuration
+        const config = {
+            gridSize: 40,      // Size of grid squares
+            speed: 2,          // Forward scroll speed
+            fov: 300,          // Field of view (Camera distance)
+            viewHeight: 120,   // Camera height off ground
+            horizon: 0.3,      // Horizon line (percentage of canvas height)
+            warpRadius: 250,   // How wide the mouse warp is
+            warpDepth: 80      // How deep the warp pushes
+        };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight * 0.6; // Matches CSS height
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Track mouse relative to canvas
+        document.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        // 3D Projection Helper
+        function project(x, y, z) {
+            const scale = config.fov / (config.fov + z);
+            const x2d = (x * scale) + width / 2;
+            const y2d = (y * scale) + (height * config.horizon);
+            return { x: x2d, y: y2d, scale: scale };
+        }
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Grid Properties
+            // We draw lines from z = 0 (close) to z = 1000 (far)
+            const cols = 40; 
+            const rows = 30; 
+            const spacing = 100;
+            const scrollOffset = (frame * config.speed) % spacing;
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#0047FF'; // Neon Blue
+
+            // Calculate points
+            const points = [];
+            
+            // Generate grid points in 3D space
+            for (let r = 0; r < rows; r++) {
+                const z = r * spacing - scrollOffset; // Move Z towards camera
+                // Don't draw if behind camera
+                if (z < 1) continue; 
+
+                const rowPoints = [];
+                for (let c = -cols/2; c < cols/2; c++) {
+                    let x = c * spacing;
+                    let y = config.viewHeight; // Flat ground
+
+                    // --- MOUSE WARP LOGIC ---
+                    // Project the mouse position roughly into 3D space to detect proximity
+                    const projected = project(x, y, z);
+                    
+                    const dx = projected.x - mouseX;
+                    const dy = projected.y - mouseY;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+
+                    // If mouse is close to this 2D point, warp the 3D Y value
+                    if (dist < config.warpRadius && mouseY > 0 && mouseY < height) {
+                        const force = (1 - dist / config.warpRadius);
+                        y += Math.sin(force * Math.PI) * config.warpDepth; 
+                    }
+
+                    rowPoints.push(project(x, y, z));
+                }
+                points.push(rowPoints);
+            }
+
+            // Draw Horizontal Lines
+            for (let r = 0; r < points.length; r++) {
+                ctx.beginPath();
+                for (let c = 0; c < points[r].length; c++) {
+                    const p = points[r][c];
+                    if (c === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                }
+                ctx.globalAlpha = Math.min(1, r / 5); 
+                ctx.stroke();
+            }
+
+            // Draw Vertical Lines
+            if (points.length > 0) {
+                const numCols = points[0].length;
+                for (let c = 0; c < numCols; c++) {
+                    ctx.beginPath();
+                    for (let r = 0; r < points.length; r++) {
+                        if (points[r][c]) {
+                            const p = points[r][c];
+                            if (r === 0) ctx.moveTo(p.x, p.y);
+                            else ctx.lineTo(p.x, p.y);
+                        }
+                    }
+                    ctx.globalAlpha = 0.3; // Faint vertical lines
+                    ctx.stroke();
+                }
+            }
+            
+            ctx.globalAlpha = 1; // Reset alpha
+            frame++;
+            requestAnimationFrame(drawGrid);
+        }
+
+        drawGrid();
+
+        // --- 3. AUDIO TOGGLE ---
+        const audio = document.getElementById('bg-audio');
+        const soundBtn = document.getElementById('sound-toggle');
+        let isPlaying = false;
+        const isMobile = window.matchMedia('(max-width: 900px)').matches;
+        soundBtn.addEventListener('click', () => {
+            if (!isPlaying) {
+                audio.volume = 0;
+                audio.play().then(() => {
+                    isPlaying = true;
+                    soundBtn.classList.add('is-playing');
+                    // Fade in over ~1s
+                    let vol = 0;
+                    const fadeIn = setInterval(() => {
+                        vol += 0.05;
+                        if (vol >= 0.5) {
+                            vol = 0.5;
+                            clearInterval(fadeIn);
+                        }
+                        audio.volume = vol;
+                    }, 50);
+                }).catch(() => {});
+            } else {
+                // Fade out over ~0.5s then pause
+                let vol = audio.volume;
+                const fadeOut = setInterval(() => {
+                    vol -= 0.05;
+                    if (vol <= 0) {
+                        vol = 0;
+                        audio.volume = 0;
+                        audio.pause();
+                        isPlaying = false;
+                        soundBtn.classList.remove('is-playing');
+                        clearInterval(fadeOut);
+                    } else {
+                        audio.volume = vol;
+                    }
+                }, 50);
+            }
+        });
+
+        // --- 4. BLADE RUNNER CRAWL ---
+        const crawlLines = document.querySelectorAll('.crawl-line');
+        let currentLine = 0;
+
+        function showNextLine() {
+            crawlLines.forEach(l => l.classList.remove('crawl-approaching', 'crawl-passing'));
+
+            const line = crawlLines[currentLine];
+            void line.offsetWidth;
+            line.classList.add('crawl-approaching');
+
+            const isLastLine = currentLine === crawlLines.length - 1;
+            const holdTime = isLastLine ? 5000 : 3000;
+            setTimeout(() => {
+                line.classList.remove('crawl-approaching');
+                line.classList.add('crawl-passing');
+                currentLine = (currentLine + 1) % crawlLines.length;
+                const pauseTime = isLastLine ? 3000 : 1200;
+                setTimeout(showNextLine, pauseTime);
+            }, holdTime);
+        }
+        showNextLine();
+
+        // --- 5. MOBILE NAV ---
+        if (isMobile) {
+            const navBtns = document.querySelectorAll('.mobile-nav-btn');
+            const panels = document.querySelectorAll('.mobile-panel');
+            let activePanel = null;
+
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const panelId = btn.dataset.panel;
+                    const panel = document.getElementById(panelId);
+
+                    if (activePanel === panel) {
+                        panel.classList.remove('active');
+                        btn.classList.remove('active');
+                        activePanel = null;
+                    } else {
+                        panels.forEach(p => p.classList.remove('active'));
+                        navBtns.forEach(b => b.classList.remove('active'));
+                        panel.style.display = 'block';
+                        void panel.offsetWidth;
+                        panel.classList.add('active');
+                        btn.classList.add('active');
+                        activePanel = panel;
+                    }
+                });
+            });
+        }
+
+    </script>
+</body>
+</html>
