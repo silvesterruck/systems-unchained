@@ -515,10 +515,10 @@
             .mobile-panel .footer-info { font-size: 0.8rem; color: #666; margin-top: 1rem; }
             .mobile-panel .footer-info a { color: #E0E0E0; border-bottom: 1px dashed #0047FF; }
 
-            /* Mobile sound toggle — centered */
+            /* Mobile sound toggle — starts below crawl */
             .sound-toggle {
                 position: fixed;
-                top: 12rem;
+                top: calc(100vh - 7rem);
                 left: 50%;
                 bottom: auto;
                 right: auto;
@@ -887,15 +887,17 @@
                     crawlWrapper.classList.add('active');
 
                     if (isMobile) {
-                        // Mobile: no flight, just proceed to split in place
+                        // Mobile: fly upward from below crawl to split height
+                        soundBtn.style.transition = 'top 1.4s cubic-bezier(0.15, 0.85, 0.25, 1)';
+                        soundBtn.style.top = '12rem';
+
                         setTimeout(() => {
                             soundBtn.classList.remove('launching');
                             soundBtn.classList.add('parked');
                             isLaunching = false;
 
-                            // Switch from CSS centered to explicit positioning
+                            // Switch from CSS centered to explicit positioning for split
                             const btnRect = soundBtn.getBoundingClientRect();
-                            soundBtn.style.bottom = 'auto';
                             soundBtn.style.left = btnRect.left + 'px';
                             soundBtn.style.top = btnRect.top + 'px';
                             soundBtn.style.transform = 'scale(0.7)';
