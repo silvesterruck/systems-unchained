@@ -189,6 +189,13 @@
 
         .scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.5)); background-size: 100% 4px; pointer-events: none; z-index: 9000; opacity: 0.15; }
 
+        /* Hide pre-launch DECRYPT when a mobile panel is open — avoids overlap with sliding panel */
+        .sound-toggle.panel-obscured {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transition: opacity 0.3s ease !important;
+        }
+
         /* --- CANVAS CONTAINER --- */
         #grid-canvas {
             position: fixed;
@@ -807,7 +814,7 @@
         let isLaunching = false;
         let crawlTimeout1 = null;
         let crawlTimeout2 = null;
-        const isMobile = window.matchMedia('(max-width: 900px)').matches;
+        let isMobile = window.matchMedia('(max-width: 900px)').matches;
         const SCALE = 0.75;
         const SCALE_MOBILE = 0.6;
 
@@ -853,11 +860,11 @@
         function positionParkedButtons() {
             const pos = getParkedPositions();
             soundBtn.style.left = pos.powerLeft + 'px';
+            soundBtn.style.top = pos.top;
+            soundBtn.style.transform = `scale(${pos.scale})`;
             audioBtn.style.left = pos.audioLeft + 'px';
-            if (isMobile) {
-                soundBtn.style.transform = `scale(${pos.scale})`;
-                audioBtn.style.transform = `scale(${pos.scale})`;
-            }
+            audioBtn.style.top = pos.top;
+            audioBtn.style.transform = `scale(${pos.scale})`;
         }
 
         soundBtn.addEventListener('click', () => {
@@ -1025,8 +1032,9 @@
             }
         });
 
-        // Keep parked buttons positioned correctly on resize
+        // Keep parked buttons positioned correctly on resize / orientation change
         window.addEventListener('resize', () => {
+            isMobile = window.matchMedia('(max-width: 900px)').matches;
             if (soundBtn.classList.contains('parked')) {
                 positionParkedButtons();
             }
@@ -1091,6 +1099,10 @@
                         panel.classList.add('active');
                         btn.classList.add('active');
                         activePanel = panel;
+                    }
+
+                    if (!hasLaunched) {
+                        soundBtn.classList.toggle('panel-obscured', activePanel !== null);
                     }
                 });
             });
